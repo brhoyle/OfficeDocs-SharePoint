@@ -89,12 +89,13 @@ To verify that OneDrive has been created for your users, see [Get a list of all 
 
 ## Pre-provision OneDrive for all licensed users in your organization
 
-The following code snippet will pre-provision OneDrive in batches of 199.
+The following code snippet will pre-provision all licensed users OneDrive in batches of 199.
+
 
 ```PowerShell
-$Credential = Get-Credential
-Connect-MgGraph -Credential $Credential
-Connect-SPOService -Credential $Credential -Url https://contoso-admin.sharepoint.com
+## Connecting to Graph and SharePoint using the MFA connection method.
+Connect-MgGraph -Scopes "User.Read.All", "Group.ReadWrite.All"
+Connect-SPOService -Url https://contoso-admin.sharepoint.com/
 
 $list = @()
 #Counters
@@ -102,7 +103,7 @@ $i = 0
 $j = 0
 
 #Get licensed users
-$users = Get-MgUser -All | Where-Object { $_.islicensed -eq $true }
+$users = Get-MgUser -Filter 'assignedLicenses/$count ne 0' -ConsistencyLevel eventual -CountVariable unlicensedUserCount -All;
 #total licensed users
 $count = $users.count
 
